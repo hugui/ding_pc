@@ -15,20 +15,26 @@ import {GetUrlParams} from '@/utils'
 
 class OrderDetail extends PureComponent {
     state = {
-        orderNo: '',
-        userId: '02206719691058932',
+        params: { // 请求参数
+            orderNo: '123'
+        },
+        // orderNo: '',
+        userId: '123',
         orderData: {},
         orderGoodlist: {
             list: []
-        }
+        },
     };
 
     componentWillMount() {
         const {location} = this.props;
         const orderNo = GetUrlParams(location, 'id');
         const userId = GetUrlParams(location, 'userId');
+        let data_params = {
+            orderNo: orderNo
+        };
         this.setState({
-            orderNo,
+            params: data_params,
             userId
         }, () => this.getOrderFunc())
     }
@@ -36,9 +42,10 @@ class OrderDetail extends PureComponent {
     // 请求接口函数
     getOrderFunc = async () => {
         try {
-            const {orderNo} = this.state  // 获取请求参数
-            const {data: {data, code, msg}} = await getOrderDetail(orderNo)
-            if (code !== '1') return message.error(msg)
+            const {params} = this.state;  // 获取请求参数
+            // alert('params=' + JSON.stringify(params));
+            const {data: {data, code, msg}} = await getOrderDetail(params)
+            if (code !== '1') return message.error(msg);
             let dataS = { // 拼接表格数据格式
                 list: data.goodsList,
             };
@@ -55,16 +62,17 @@ class OrderDetail extends PureComponent {
         e.preventDefault();
 
         try {
-            const {orderNo} = this.state
-            const {userId} = this.state
+            // const {params} = this.state;  // 获取请求参数
+            // alert('submit,params=' + JSON.stringify(params));
+            const {userId} = this.state;
             // const {data: {code, msg}} = await submitOrder({orderNo, userId}) // userId -- 不知
-            const {data: {code, msg}} = await submitOrder({userId: userId, orderNo: orderNo})
+            const {data: {code, msg}} = await submitOrder({userId: userId, orderNo: this.state.params.orderNo})
             if (code !== 1) {
                 return message.success(msg);
             } else {
                 message.success(msg);
+                //跳转到上一个页面
             }
-            //跳转到上一个页面
         } catch (error) {
             console.log(error)
         }
@@ -179,7 +187,7 @@ class OrderDetail extends PureComponent {
             >
                 <Descriptions column={2}>
                     <Descriptions.Item label="订单类型">{orderData.orderCategory}</Descriptions.Item>
-                    <Descriptions.Item label="订单编号">{orderNo}</Descriptions.Item>
+                    <Descriptions.Item label="订单编号">{orderData.orderNo}</Descriptions.Item>
                     <Descriptions.Item label="供应商编码" span={2}>{orderData.supplierCode}</Descriptions.Item>
                     <Descriptions.Item label="供应商名称">{orderData.supplierName}</Descriptions.Item>
                     <Descriptions.Item label="采购方名称">{orderData.purchaseName}</Descriptions.Item>
@@ -218,6 +226,7 @@ class OrderDetail extends PureComponent {
                 </Form>
             </Card>
         );
+
     }
 }
 

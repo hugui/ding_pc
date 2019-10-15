@@ -18,9 +18,9 @@ class PendingOrder extends PureComponent {
     state = {
         corpId: 'dingde1e7be2ecdfb9d135c2f4657eb6378f',
         params: { // 请求参数
-            mobile: '13012820155'
+            mobile: '123'
         },
-        userId: '02206719691058932',
+        userId: '345',
         access_code: {//免登陆授权码
             code: ''
         },
@@ -57,15 +57,14 @@ class PendingOrder extends PureComponent {
         }, () => this.getOrderListFunc());
     };
 
-    componentWillMount() {
-        this.getAccessCodeFunc();
-        this.getUserInfoFunc();
-        this.getOrderListFunc();
+    async componentWillMount() {
+        await this.getAccessCodeFunc();
+        // this.getUserInfoFunc();
+        // this.getOrderListFunc();
     }
 
     // 获取免登陆code
     getAccessCodeFunc = async () => {
-        let access_code = '';
         const _this = this;
         const corpId = this.state.corpId;
         //钉钉sdk 初始化 dd.ready参数为回调函数，在环境准备就绪时触发，jsapi的调用需要保证在该回调函数触发后调用，否则无效。
@@ -78,28 +77,43 @@ class PendingOrder extends PureComponent {
                     let dataS = {
                         code: result.code
                     };
-                    _this.setState({access_code: dataS});
-                    access_code = dataS;
-                    // alert('code=' + result.code)
-                    // alert('dataS=' + JSON.stringify(dataS))
-                    // alert('access_code=' + JSON.stringify(access_code));
+                    _this.setState({access_code: dataS}, async () => {
+                        const {access_code} = _this.state;
+                        // alert('access_code=' + JSON.stringify(access_code));
+                        // const {data: {data, code, msg}} = await userInfo(access_code)
+                        // alert('data=' + JSON.stringify(data));
+                        // if (code !== '1') return message.error(msg);
+                        await _this.getUserInfoFunc();
+                    });
                 }
             });
         });
     };
 
+
     // 获取用户信息
     getUserInfoFunc = async () => {
         try {
             const {access_code} = this.state;  // 获取请求参数
-            // alert(JSON.stringify(access_code));
+            // alert('access_code1=' + JSON.stringify(access_code));
             const {data: {data, code, msg}} = await userInfo(access_code)
-            console.log(data);
+            // alert('userInfo=' + JSON.stringify(data));
             if (code !== '1') return message.error(msg);
+            // alert('userId=' + data.user.userId);
+            this.setState({userId: data.user.userId});
+            let data_params = {
+                mobile: data.user.mobile
+            };
+            this.setState({userId: data.user.userId})
+            this.setState({params: data_params}, async () => {
+                const {params} = this.state;
+                // alert('params=' + JSON.stringify(params));
+                await this.getOrderListFunc();
+            })
         } catch (error) {
-            console.log('err', error)
+            console.log('error', error)
         }
-    }
+    };
 
     // 请求接口函数
     getOrderListFunc = async () => {
@@ -124,6 +138,7 @@ class PendingOrder extends PureComponent {
 
     // 跳转
     hrefFun = (x, state) => {
+        // alert('userId=' + this.state.userId);
         this.props.history.push({
             pathname: `/${x}`,
             search: `id=${state.orderNo}&userId=` + this.state.userId,

@@ -15,7 +15,7 @@ class Routers extends Component {
 		// console.log(pathname, 'pathname')
 		this.state = {
 			historyTitle: {
-				'/': '首页',
+				'/': '列表',
 				'/detail': '详情'
 			}
 		}
