@@ -67,11 +67,13 @@ class OrderDetail extends PureComponent {
             const {userId} = this.state;
             // const {data: {code, msg}} = await submitOrder({orderNo, userId}) // userId -- 不知
             const {data: {code, msg}} = await submitOrder({userId: userId, orderNo: this.state.params.orderNo})
-            if (code !== 1) {
-                return message.success(msg);
+            // alert('code=' + code)
+            if (code != 1) {
+                return message.error(msg);
             } else {
-                message.success(msg);
+                message.success('发起' + msg);
                 //跳转到上一个页面
+                window.history.go(-1);
             }
         } catch (error) {
             console.log(error)
